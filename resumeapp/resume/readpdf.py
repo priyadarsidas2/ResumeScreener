@@ -1,5 +1,3 @@
-#import aspose.words as aw
-#import random
 import PyPDF2
 
 def extractTextFromPDF(fileName):
@@ -7,7 +5,7 @@ def extractTextFromPDF(fileName):
     # creating a pdf reader object
     pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
     # printing number of pages in pdf file
-    #print(pdfReader.numPages)
+    # print(pdfReader.numPages)
 
     extractedText = ''
     for i in range(pdfReader.numPages):

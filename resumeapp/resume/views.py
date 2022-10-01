@@ -3,9 +3,8 @@ from flask import Flask, flash, request, redirect, url_for
 from resumeapp.resume.forms import ResumeForm
 from flask import Blueprint, render_template
 from resumeapp.resume.readpdf import extractTextFromPDF
-from resumeapp.resume.scoring import scoringAndExperienceCheck, findSubtextForExperienceSearch, cleanExperienceRange
+from resumeapp.resume.scoringAndExperience import scoringAndExperienceCheck
 from resumeapp.resume.email import sendEmail
-from resumeapp.resume.cleanoutput import deleteOutputFiles
 
 resume = Blueprint('resume',__name__)
 
@@ -33,8 +32,8 @@ def create_post():
         fileName = form.fileName.data
         fileName.save(fileName.filename)
         extractedText = extractTextFromPDF(fileName.filename)
-        matchPercent, skillsFound, skillsNotFound, experienceInYears, pointsAchieved, pointsLost = scoringAndExperienceCheck(
-                                                                            primarySkill, secondarySkill, extractedText)
+        matchPercent, skillsFound, skillsNotFound, experienceInYears, pointsAchieved, pointsLost, similarityPercent, totalScore = scoringAndExperienceCheck(
+                                                                            primarySkill, secondarySkill, extractedText, description)
         experienceInYears = round(experienceInYears, 2)
 
         #fileName.save(os.path.join(app.config['UPLOAD_FOLDER'], fileName))
@@ -50,7 +49,9 @@ def create_post():
                                 experienceInYears = experienceInYears,
                                 pointsAchieved = pointsAchieved,
                                 pointsLost = pointsLost,
-                                emailid = emailid
+                                emailid = emailid,
+                                similarityPercent = similarityPercent,
+                                totalScore = totalScore
                                 )
         sendEmail(emailid, fileName.filename, htmlPage)
         #deleteOutputFiles()
