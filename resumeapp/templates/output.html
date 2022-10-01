@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+
+    <div class="jumbotron">
+        <div align='center'>
+            <h1 >Scoring Report</h1>
+        </div>
+    </div>
+
+    <div class="jumbotron">
+        <div align='left'>
+            <p><b>Job Description</b></p>
+            {{description}}
+            <br><br>
+
+            <p><b>Experience Required (years): </b> {{experience}} </p>
+            <br>
+
+            <p><b>Primary skill: </b> {{primarySkill}} </p>
+            <br>
+
+            <p><b>Secondary skill: </b> {{secondarySkill}} </p>
+            <br>
+
+            <p><b>File Uploaded: </b> {{fileName}} </p>
+            <br>
+
+            <p><b>Skills Matched: </b> {{skillsFound}} </p>
+            <br>
+
+            <p><b>Skills Not Matched: </b> {{skillsNotFound}} </p>
+            <br>
+
+            <p><b>Experience of candidate (years): </b> {{experienceInYears}} </p>
+            <br>
+
+            <p><b>Points Achieved: </b> {{pointsAchieved}} </p>
+            <br>
+
+            <p><b>Points Lost: </b> {{pointsLost}} </p>
+            <br>
+
+            <p>
+              <b>Scoring Methodology: </b> <br><br>
+              Primary Skill - 50 points <br>
+              Secondary Skill - 25 points <br>
+              Additional Skills - 5 points * 10 <br>
+              Total Score = 100 <br><br>
+              <b>Scoring: {{matchPercent}} % </b>
+            </p>
+            <br>
+
+            <p>The scoring report has been sent to {{emailid}}</p>
+        </div>
+    </div>
+
+{% endblock content %}
