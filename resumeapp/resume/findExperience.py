@@ -6,7 +6,7 @@ def findDatesFromText(text):
 
     for i in text.split("\n"):
         print(i)
-        if "present" in i or "current" in i or "ongoing" in i.lower():
+        if "present" in i or "current" in i or "ongoing" in i.lower() or "since" in i.lower():
             currentDate = datetime.now()
             lastDate = str(currentDate.day) + "/" + str(currentDate.month) + "/" + str(currentDate.year)
 
@@ -14,7 +14,8 @@ def findDatesFromText(text):
                   "january": 1 , "february": 2, "march": 3, "april": 4, "may": 5, "june": 6, "july": 7, "august": 8, "september": 9, "october": 10, "november": 11, "december": 12}
     months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec", "sept",
             "january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
-
+    yearNames = [*range(1990, 2022, 1)]
+    
     #Dates in format June 2021
     listOfDates1 = re.findall(r'[A-Z,a-z]+\s\d{4}', text)
     listOfDates1 = list(set(listOfDates1))
@@ -25,17 +26,15 @@ def findDatesFromText(text):
         print(listOfDates1[i].split(" ")[0])
         listOfDates1[i] = listOfDates1[i].replace(",", "")
         listOfDates1[i] = listOfDates1[i].replace(".", "")
-        if listOfDates1[i].split(" ")[0] in months:
-            listOfDates1rev.append(listOfDates1[i])
+        for j in months:
+            #print(j)
+            if j in listOfDates1[i].split(" ")[0].lower():
+                print("j", j)
+                date = "1/" + str(monthsToNum[j]) + "/" + str(listOfDates1[i].split(" ")[1])
+                listOfDates1rev.append(date)
+                break
 
     listOfDates1 = listOfDates1rev
-    print("listOfDates1", listOfDates1)
-    for i in range(0, len(listOfDates1)):
-        print(str(monthsToNum[listOfDates1[i].split(" ")[0].lower()]))
-        print(str(listOfDates1[i].split(" ")[1]))
-        date = "1/" + str(monthsToNum[listOfDates1[i].split(" ")[0].lower()]) + "/" + str(listOfDates1[i].split(" ")[1])
-        listOfDates1[i] = date
-
 
     #Dates in format 02-2021
     listOfDates2 = re.findall(r'\d{1,2}-\d{4}', text)
@@ -81,6 +80,7 @@ def findDatesFromText(text):
 
 
     listOfDates = listOfDates1 + listOfDates2 + listOfDates3 + listOfDates4 + listOfDates5 + listOfDates6 + listOfDates7
+    listOfDates = [i for i in listOfDates if int(i.split("/")[2]) in yearNames]
     listOfDates = sorted(listOfDates, key= lambda x: x.split("/")[2])
 
     print("listOfDates", listOfDates)
@@ -88,9 +88,13 @@ def findDatesFromText(text):
     if not lastDate:
         lastDate = listOfDates[-1]
     firstDate = listOfDates[0]
+    
+    print("firstDate", firstDate)
+    print("lastDate", lastDate)
 
     days = int(lastDate.split("/")[0]) - int(firstDate.split("/")[0])
     months = int(lastDate.split("/")[1]) - int(firstDate.split("/")[1])
-    years = months = int(lastDate.split("/")[2]) - int(firstDate.split("/")[2])
+    years = int(lastDate.split("/")[2]) - int(firstDate.split("/")[2])
+    print(days, months, years)
     experience = round(days/365 + months/12 + years, 1)
     return experience

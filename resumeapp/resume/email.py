@@ -21,37 +21,6 @@ def sendEmail(emailid, fileName, htmlPage):
 
     text = "Hi, the report is as follows:"
 
-    '''
-    # Create the plain-text and HTML version of your message
-    text = """\
-    Scoring Report
-
-    Job Description:
-    """ +  description + """\
-
-    Experience Required (years):""" + str(experience) + """\
-    Primary skill: """ + primarySkill + """\
-    Secondary skill: """ + secondarySkill + """\
-    File Uploaded: """ + fileName + """\
-    Skills Matched: """ + str(skillsFound)  + """\
-    Skills Not Matched: """ + str(skillsNotFound)  + """\
-    Experience of candidate (years): """ + str(experienceInYears) + """\
-    Points Achieved: """ + str(pointsAchieved) + """\
-    Points Lost: """ + str(pointsLost) + """\
-
-    Scoring Methodology:
-    Primary Skill - 50 points
-    Secondary Skill - 25 points
-    Additional Skills - 5 points * 10 (maximum)
-    Total Score = 100
-
-    Scoring: """ + str(matchPercent) + " % "
-    '''
-    #pdf = pdfkit.from_string(htmlPage, False)
-    #response = make_response(pdf)
-    #response.headers["Content-Type"] = "application/pdf"
-    #response.headers["Content-Disposition"] = "inline; filename=output.pdf"
-
     # Turn these into plain/html MIMEText objects
     part1 = MIMEText(text, "plain")
     part2 = MIMEText(htmlPage, "html")

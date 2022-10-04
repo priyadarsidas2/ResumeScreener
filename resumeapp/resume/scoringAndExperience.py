@@ -6,6 +6,9 @@ from resumeapp.resume.cleanText import cleanTextUsingNLP
 from resumeapp.resume.findExperienceText import findSubtextForExperienceSearch
 from resumeapp.resume.findExperience import findDatesFromText
 from resumeapp.resume.similarity import findCosineSimilarity
+from resumeapp.resume.similar import addSimilarKeywords
+import warnings
+warnings.filterwarnings("ignore")
 
 def scoringAndExperienceCheck(primarySkill, secondarySkill, extractedText, jobDescription):
     df = pd.read_excel("SkillsList.xlsx")
@@ -15,10 +18,12 @@ def scoringAndExperienceCheck(primarySkill, secondarySkill, extractedText, jobDe
     skillsFound = []
     for language in df['Skills']:
         #if language in cleaned_text:
-        if (language + " " in cleanedTextAsString or language + "\n" in cleanedTextAsString):
+        if (language + " " in cleanedTextAsString or language + "\n" in cleanedTextAsString or 
+            language + "," in cleanedTextAsString or language + "/" in cleanedTextAsString):
             skillsFound.append(language)
+    print("skillsFound before adding similar keywords", skillsFound)
     skillsFound = list(set(skillsFound))
-
+    skillsFound     = addSimilarKeywords(skillsFound)
     skillsNotFound = []
     pointsAchieved = 0
 
@@ -27,11 +32,12 @@ def scoringAndExperienceCheck(primarySkill, secondarySkill, extractedText, jobDe
 
     for i in skillsFound:
         if not primarySkillFound:
-            if primarySkill.lower() in i.lower():
+            if primarySkill.lower() == i.lower():
+                print("Primary skill", i.lower())
                 pointsAchieved += 50
                 primarySkillFound = True
         if not secondarySkillFound:
-            if secondarySkill.lower() in i.lower():
+            if secondarySkill.lower() == i.lower():
                 pointsAchieved += 25
                 secondarySkillFound = True
         print("pointsAchieved", pointsAchieved)
@@ -58,7 +64,7 @@ def scoringAndExperienceCheck(primarySkill, secondarySkill, extractedText, jobDe
     pointsLost = 100 - pointsAchieved
 
     matchPercent = pointsAchieved
-    matchPercent = round(matchPercent, 0)
+    matchPercent = round(matchPercent, 2)
 
     experienceText = findSubtextForExperienceSearch(extractedText.lower())
 
@@ -74,14 +80,20 @@ def scoringAndExperienceCheck(primarySkill, secondarySkill, extractedText, jobDe
     #print(jobDescriptionText)
     print()
     similarityPercent = findCosineSimilarity(jobDescriptionText, resumeText) * 100
-    similarityPercent = round(similarityPercent, 0)
+    similarityPercent = round(similarityPercent, 2)
     
     #calculating final percent
-    totalScore = round((matchPercent * .80) + (similarityPercent * 0.20), 0)
+    totalScore = (matchPercent * .80) + (similarityPercent * 0.20)
+    
+    #cleaning skillsFound
+    skillsFound = cleanTextUsingNLP(" ".join(skillsFound))
+    skillsFound = skillsFound.split(" ")
+    skillsFound = list(set(skillsFound))
+    skillsFound = sorted(skillsFound)
     
     #printing outputs
     print("matchPercent", matchPercent)
-    print("skillsFound", skillsFound)
+    print("skillsFound", sorted(skillsFound))
     print("skillsNotFound", skillsNotFound)
     print("experienceInYears", experienceInYears)
     print("pointsAchieved", pointsAchieved)
@@ -89,7 +101,6 @@ def scoringAndExperienceCheck(primarySkill, secondarySkill, extractedText, jobDe
     print("similarityPercent", similarityPercent)
     print("total Percent", totalScore)
     
-    
-    
     return (matchPercent, skillsFound, skillsNotFound, experienceInYears, pointsAchieved, 
             pointsLost, similarityPercent, totalScore)
+
