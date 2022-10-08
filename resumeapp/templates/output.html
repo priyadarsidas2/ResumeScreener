@@ -9,44 +9,46 @@
 
     <div class="jumbotron">
         <div align='left'>
+
+            <p><b>Job Title</b></p>
+            {{title}}
+            <br><br>
+
             <p><b>Job Description</b></p>
             {{description}}
             <br><br>
 
-            <p><b>Experience Required (years): </b> {{experience}} </p>
+            <p><b>Resume Uploaded: </b> {{fileName}} </p>
             <br>
 
-            <p><b>Primary skill: </b> {{primarySkill}} </p>
+            <p><b>Skills Required: </b> {{relevantSkills}} </p>
             <br>
 
-            <p><b>Secondary skill: </b> {{secondarySkill}} </p>
+            <p><b>Primary Skills Required: </b> {{primarySkillsInRelevantSkills}} </p>
             <br>
 
-            <p><b>File Uploaded: </b> {{fileName}} </p>
+            <p><b>Secondary Skills Required: </b> {{secondarySkillsInRelevantSkills}} </p>
             <br>
 
-            <p><b>Skills Matched: </b> {{skillsFound}} </p>
+            <p><b>Skills Matched: </b> {{skillsMatched}} </p>
             <br>
 
             <p><b>Skills Not Matched: </b> {{skillsNotFound}} </p>
             <br>
 
-            <p><b>Experience of candidate (years): </b> {{experienceInYears}} </p>
+            <p><b>Profile Status: </b> {{profileStatus}} </p>
             <br>
 
-            <p><b>Points Achieved: </b> {{pointsAchieved}} </p>
+            <p><b>Points from Profile Match: </b> {{pointsFromProfile}} </p>
+            <br>
+            
+            <p><b>Points from Primary Skills Match: </b> {{pointsFromPrimarySkills}} </p>
             <br>
 
-            <p><b>Points Lost: </b> {{pointsLost}} </p>
-            <br>
+            <p><b>Points from Secondary Skills Match: </b> {{pointsFromSecondarySkills}} </p>
+            <br>            
 
-            <p><b>Skill Similarity %: </b> {{matchPercent}} </p>
-            <br>
-
-            <p><b>Semantic Similarity %: </b> {{similarityPercent}} </p>
-            <br>
-
-            <p><b>Total Similarity Score %: </b> {{totalScore}} </p>
+            <p><b>Total Score: </b> {{matchPercent}} </p>
             <br>
 
             <p>

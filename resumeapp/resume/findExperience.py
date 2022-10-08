@@ -56,7 +56,7 @@ def findDatesFromText(text):
     listOfDates4 = list(set(listOfDates4))
 
 
-    #Dates in format 02/02/2021
+    #Dates in format 02-02-2021
     listOfDates5 = re.findall(r'\d{1,2}-\d{1,2}-\d{4}', text)
     listOfDates5 = list(set(listOfDates5))
     for i in range(0, len(listOfDates5)):

@@ -1,90 +1,92 @@
 import pandas as pd
-import numpy as np
-from datetime import datetime
-import re
 from resumeapp.resume.cleanText import cleanTextUsingNLP
-from resumeapp.resume.findExperienceText import findSubtextForExperienceSearch
-from resumeapp.resume.findExperience import findDatesFromText
-from resumeapp.resume.similarity import findCosineSimilarity
 from resumeapp.resume.similar import addSimilarKeywords
+from resumeapp.resume.classify import classifyJobProfile
 import warnings
 warnings.filterwarnings("ignore")
 
-def scoringAndExperienceCheck(primarySkill, secondarySkill, extractedText, jobDescription):
+def scoringAndExperienceCheck(jobProfile, extractedText, jobDescription):
     df = pd.read_excel("SkillsList.xlsx")
-
+    
+    #skills in resume
     cleanedTextAsString = cleanTextUsingNLP(extractedText)
+    cleanedTextAsString = cleanedTextAsString.lower()
+    
     print(cleanedTextAsString)
     skillsFound = []
     for language in df['Skills']:
-        #if language in cleaned_text:
-        if (language + " " in cleanedTextAsString or language + "\n" in cleanedTextAsString or 
-            language + "," in cleanedTextAsString or language + "/" in cleanedTextAsString):
-            skillsFound.append(language)
+        if (language.lower() + " " in cleanedTextAsString or language.lower() + "\n" in cleanedTextAsString or 
+            language.lower() + "," in cleanedTextAsString or language.lower() + "/" in cleanedTextAsString):
+            skillsFound.append(language.lower())
+            
     print("skillsFound before adding similar keywords", skillsFound)
     skillsFound = list(set(skillsFound))
-    skillsFound     = addSimilarKeywords(skillsFound)
-    skillsNotFound = []
-    pointsAchieved = 0
+    skillsFound = addSimilarKeywords(skillsFound)
+    
+    #finding the job profile from resume text
+    profile = classifyJobProfile(cleanedTextAsString)
+    
+    
+    #finding the skills from job description
+    cleanedJD = cleanTextUsingNLP(jobDescription)
+    cleanedJD = cleanedJD.lower()
+    relevantSkills = []
+    for language in df['Skills']:
+        
+        if (language.lower() + " " in cleanedJD or language.lower() + "\n" in cleanedJD or 
+            language.lower() + "," in cleanedJD or language.lower() + "/" in cleanedJD):
+            relevantSkills.append(language.lower())
 
-    primarySkillFound = False
-    secondarySkillFound = False
+    relevantSkills = list(set(relevantSkills))
+    
+    #matching skills in resume to relevant skills in job description
+    skillsMatched = []
 
-    for i in skillsFound:
-        if not primarySkillFound:
-            if primarySkill.lower() == i.lower():
-                print("Primary skill", i.lower())
-                pointsAchieved += 50
-                primarySkillFound = True
-        if not secondarySkillFound:
-            if secondarySkill.lower() == i.lower():
-                pointsAchieved += 25
-                secondarySkillFound = True
-        print("pointsAchieved", pointsAchieved)
+    for skill in relevantSkills:
+        if skill in skillsFound:
+            skillsMatched.append(skill)
 
-    if not primarySkillFound:
-        skillsNotFound.append(primarySkill)
-
-    if not secondarySkillFound:
-        skillsNotFound.append(secondarySkill)
-
-    numberOfSkills = 0
-    if primarySkillFound:
-        numberOfSkills -= 1
-    if secondarySkillFound:
-        numberOfSkills -= 1
-    numberOfSkills += len(skillsFound)
-    numberOfSkills = 5 if numberOfSkills > 5 else numberOfSkills
-    additionalPoints = 5 * numberOfSkills
-    print("numberOfSkills", numberOfSkills)
-    #additionalPoints = 25 if additionalPoints >25 else additionalPoints
-    print("Additional Points", additionalPoints)
-    pointsAchieved += additionalPoints
-    print("Points Achieved", pointsAchieved)
-    pointsLost = 100 - pointsAchieved
-
-    matchPercent = pointsAchieved
+    skillsMatched = list(set(skillsMatched))
+            
+    print("relevantSkills", relevantSkills)
+    print("skillsMatched", skillsMatched)
+    
+    skillsNotFound = [i for i in relevantSkills if i not in skillsMatched]
+    
+    primarySkillList = ["python", "java", "sql", "aws", "spring", "springboot"]
+    primarySkillsInRelevantSkills = [i for i in relevantSkills if i in primarySkillList]
+    secondarySkillsInRelevantSkills = [i for i in relevantSkills if i not in primarySkillList]
+    
+    numberOfPrimarySkills = len(primarySkillsInRelevantSkills)
+    numberOfSecondarySkills = len(secondarySkillsInRelevantSkills)
+    
+    try:
+        pointsPerPrimarySkill = 60 / numberOfPrimarySkills
+    except:
+        pointsPerPrimarySkill = 0
+    try:
+        pointsPerSecondarySkill = 20 / numberOfSecondarySkills
+    except:
+        pointsPerSecondarySkill = 0
+        
+    primarySkillsFoundInResume = [i for i in skillsMatched if i in primarySkillsInRelevantSkills]
+    secondarySkillsFoundInResume = [i for i in skillsMatched if i in secondarySkillsInRelevantSkills]
+    
+    pointsFromPrimarySkills = len(primarySkillsFoundInResume) * pointsPerPrimarySkill
+    pointsFromSecondarySkills = len(secondarySkillsFoundInResume) * pointsPerSecondarySkill
+    
+    pointsFromProfile = 0
+    jobProfile = jobProfile.lower()
+    
+    for word in jobProfile.split(" "):
+        if word in profile.split(" "):
+            print(word)
+            pointsFromProfile = 20
+    
+    matchPercent = pointsFromProfile + pointsFromPrimarySkills + pointsFromSecondarySkills
+    
     matchPercent = round(matchPercent, 2)
 
-    experienceText = findSubtextForExperienceSearch(extractedText.lower())
-
-    experienceInYears = findDatesFromText(experienceText)
-    
-    #finding cosine similarity
-    resumeText = cleanedTextAsString
-    #print("resumeText")
-    #print(resumeText)
-    print()
-    jobDescriptionText = cleanTextUsingNLP(jobDescription)
-    #print("jobDescriptionText")
-    #print(jobDescriptionText)
-    print()
-    similarityPercent = findCosineSimilarity(jobDescriptionText, resumeText) * 100
-    similarityPercent = round(similarityPercent, 2)
-    
-    #calculating final percent
-    totalScore = (matchPercent * .80) + (similarityPercent * 0.20)
-    
     #cleaning skillsFound
     skillsFound = cleanTextUsingNLP(" ".join(skillsFound))
     skillsFound = skillsFound.split(" ")
@@ -92,15 +94,13 @@ def scoringAndExperienceCheck(primarySkill, secondarySkill, extractedText, jobDe
     skillsFound = sorted(skillsFound)
     
     #printing outputs
-    print("matchPercent", matchPercent)
-    print("skillsFound", sorted(skillsFound))
+    print("skillsFound", skillsMatched)
     print("skillsNotFound", skillsNotFound)
-    print("experienceInYears", experienceInYears)
-    print("pointsAchieved", pointsAchieved)
-    print("pointsLost", pointsLost)
-    print("similarityPercent", similarityPercent)
-    print("total Percent", totalScore)
-    
-    return (matchPercent, skillsFound, skillsNotFound, experienceInYears, pointsAchieved, 
-            pointsLost, similarityPercent, totalScore)
-
+    print("pointsFromProfile", pointsFromProfile)
+    print("primarySkillsInRelevantSkills", primarySkillsInRelevantSkills)
+    print("secondarySkillsInRelevantSkills", secondarySkillsInRelevantSkills)
+    print("pointsFromPrimarySkills", pointsFromPrimarySkills)
+    print("pointsFromSecondarySkills", pointsFromSecondarySkills)
+    print("matchPercent", matchPercent)
+    return (relevantSkills,skillsMatched, skillsNotFound, pointsFromProfile, primarySkillsInRelevantSkills,
+            secondarySkillsInRelevantSkills, pointsFromPrimarySkills, pointsFromSecondarySkills, matchPercent)
